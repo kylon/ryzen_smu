@@ -80,6 +80,7 @@ def getCodeName():
         "Chagall",
         "Raphael",
         "Phoenix"
+        "Hawk Point"
     ]
     args = read_file_str(CN_PATH, 2)
 
