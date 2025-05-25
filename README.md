@@ -1,5 +1,7 @@
 # Ryzen SMU
 
+fork of leogx9r ryzen_smu with picks from other forks
+
 <img src="pics/preview1.jpg" width="400" height="650"> <img src="pics/preview2.jpg" width="400" height="650">
 
 <small>*N.B. Images above shows the potential capabilities of this driver, retrieved using the
@@ -88,20 +90,10 @@ Be sure kernel headers, dev utilities such as `gcc` and `make` are installed bef
 
 ```sh
 sudo apt install dkms git build-essential linux-headers-$(uname -r)
-git clone https://gitlab.com/leogx9r/ryzen_smu.git
+git clone https://github.com/kylon/ryzen_smu
 cd ryzen_smu
 
 sudo make dkms-install
-```
-
-### Arch Linux
-
-Available on the [AUR](https://aur.archlinux.org/packages/ryzen_smu-dkms-git/).
-
-Install it using your AUR helper of choice, example:
-
-```sh
-yay -S ryzen_smu-dkms-git
 ```
 
 ### Stand-alone Installation
