@@ -541,8 +541,8 @@ void smu_cleanup(void) {
     g_smu.codename = CODENAME_UNDEFINED;
 }
 
-smu_processor_codename smu_get_codename(void) {
-    return g_smu.codename;
+const char *smu_get_codename(void) {
+    return getCodeName(g_smu.codename);
 }
 
 u32 smu_get_version(const struct pci_dev* dev, const smu_mailbox mb) {
