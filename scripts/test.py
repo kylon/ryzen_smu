@@ -9,9 +9,9 @@ FS_PATH = '/sys/kernel/ryzen_smu_drv/'
 VER_PATH = FS_PATH + 'version'
 SMN_PATH = FS_PATH + 'smn'
 SMU_ARGS = FS_PATH + 'smu_args'
-RSMU_CMD  = FS_PATH + 'rsmu_cmd'
-CN_PATH  = FS_PATH + 'codename'
-PM_PATH  = FS_PATH + 'pm_table'
+RSMU_CMD = FS_PATH + 'rsmu_cmd'
+CN_PATH = FS_PATH + 'codename'
+PM_PATH = FS_PATH + 'pm_table'
 
 def is_root():
     return os.getenv("SUDO_USER") is not None or os.geteuid() == 0
@@ -59,34 +59,27 @@ def write_file192(file, v1, v2, v3, v4, v5, v6):
 
     return result == 24
 
-def write_file192(file, v1, v2, v3, v4, v5, v6):
-    with open(file, "wb") as fp:
-        result = fp.write(struct.pack("<IIIIII", v1, v2, v3, v4, v5, v6))
-        fp.close()
-
-    return result == 24
-
 def read_file_str(file, expectedLen = 9):
     with open(file, "r") as fp:
         result = fp.read(expectedLen)
         fp.close()
-    
+
     if len(result) != expectedLen:
         print("Read file ({0}) failed with {1}".format(file, len(result)))
         return False
-    
+
     return result
 
 def read_smn_addr(addr):
     if write_file32(SMN_PATH, addr) == False:
         print("Failed to read SMN address: {:08X}".format(addr))
         return 0
-    
+
     value = read_file32(SMN_PATH)
-    
+
     if value == False:
         return 0
-    
+
     return value
 
 def write_smn_addr(addr, value):
@@ -109,7 +102,7 @@ def smu_command(op, arg1, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0, arg6 = 0):
     else:
         print("Failed to get SMU status response")
         return False
-            
+
     # Write all arguments to the appropriate files
     if write_file192(SMU_ARGS, arg1, arg2, arg3, arg4, arg5, arg6) == False:
         print("Failed to write SMU arguments")
@@ -118,7 +111,7 @@ def smu_command(op, arg1, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0, arg6 = 0):
     # Write the command
     if write_file32(RSMU_CMD, op) == False:
         print("Failed to execute the SMU command: {:08X}".format(op))
-    
+
     # Check for the result:
     value = read_file32(RSMU_CMD)
     if value != False:
@@ -147,7 +140,7 @@ def test_get_version():
 
     if args == False:
         return False
-    
+
     v_test = "{:d}.{:d}.{:d}\n".format(
         args[0] >> 16 & 0xff,
         args[0] >> 8 & 0xff,
@@ -184,15 +177,15 @@ def test_get_codename():
         "Naples",
         "Chagall",
         "Raphael",
-        "Phoenix"
-        "Hawk Point"
+        "Phoenix",
+        "Hawk Point",
     ]
     args = read_file_str(CN_PATH, 3)
 
     if args != False and int(args) != 0 and int(args) < len(codenames):
         print("Processor Code Name: " + codenames[int(args)])
         return True
-    
+
     print("Failed to detect processor code name!")
     return False
 
@@ -225,5 +218,5 @@ def main():
         print("Failed to read SMN address. Is your system supported?")
 
 
-
 main()
+

@@ -10,60 +10,60 @@
 #include "smu.h"
 
 static struct {
-    smu_processor_codename    codename;
+    smu_processor_codename codename;
 
     // Optional RSMU mailbox addresses.
-    u32                            addr_rsmu_mb_cmd;
-    u32                            addr_rsmu_mb_rsp;
-    u32                            addr_rsmu_mb_args;
+    u32 addr_rsmu_mb_cmd;
+    u32 addr_rsmu_mb_rsp;
+    u32 addr_rsmu_mb_args;
 
     // Mandatory MP1 mailbox addresses.
-    smu_if_version            mp1_if_ver;
-    u32                            addr_mp1_mb_cmd;
-    u32                            addr_mp1_mb_rsp;
-    u32                            addr_mp1_mb_args;
+    smu_if_version mp1_if_ver;
+    u32 addr_mp1_mb_cmd;
+    u32 addr_mp1_mb_rsp;
+    u32 addr_mp1_mb_args;
 
-    u32                            addr_hsmp_mb_cmd;
-    u32                            addr_hsmp_mb_rsp;
-    u32                            addr_hsmp_mb_args;
+    u32 addr_hsmp_mb_cmd;
+    u32 addr_hsmp_mb_rsp;
+    u32 addr_hsmp_mb_args;
 
     // Optional PM table information.
-    u64                            pm_dram_base;
-    u32                            pm_dram_base_alt;
-    u32                            pm_dram_map_size;
-    u32                            pm_dram_map_size_alt;
+    u64 pm_dram_base;
+    u32 pm_dram_base_alt;
+    u32 pm_dram_map_size;
+    u32 pm_dram_map_size_alt;
 
     // Internal tracker to determine the minimum interval required to
-    //  refresh the metrics table.
-    u32                            pm_jiffies;
+    // refresh the metrics table.
+    u32 pm_jiffies;
 
     // Virtual addresses mapped to physical DRAM bases for PM table.
-    u8 __iomem*                    pm_table_virt_addr;
-    u8 __iomem*                    pm_table_virt_addr_alt;
+    u8 __iomem* pm_table_virt_addr;
+    u8 __iomem* pm_table_virt_addr_alt;
 } g_smu = {
-    .codename                    = CODENAME_UNDEFINED,
+    .codename = CODENAME_UNDEFINED,
 
-    .addr_rsmu_mb_cmd            = 0,
-    .addr_rsmu_mb_rsp            = 0,
-    .addr_rsmu_mb_args           = 0,
+    .addr_rsmu_mb_cmd = 0,
+    .addr_rsmu_mb_rsp = 0,
+    .addr_rsmu_mb_args = 0,
 
-    .mp1_if_ver                  = IF_VERSION_COUNT,
-    .addr_mp1_mb_cmd             = 0,
-    .addr_mp1_mb_rsp             = 0,
-    .addr_mp1_mb_args            = 0,
+    .mp1_if_ver = IF_VERSION_COUNT,
+    .addr_mp1_mb_cmd = 0,
+    .addr_mp1_mb_rsp = 0,
+    .addr_mp1_mb_args = 0,
 
-    .addr_hsmp_mb_cmd            = 0,
-    .addr_hsmp_mb_rsp            = 0,
-    .addr_hsmp_mb_args           = 0,
+    .addr_hsmp_mb_cmd = 0,
+    .addr_hsmp_mb_rsp = 0,
+    .addr_hsmp_mb_args = 0,
 
-    .pm_dram_base                = 0,
-    .pm_dram_base_alt            = 0,
-    .pm_dram_map_size            = 0,
-    .pm_dram_map_size_alt        = 0,
-    .pm_jiffies                  = 0,
+    .pm_dram_base = 0,
+    .pm_dram_base_alt = 0,
+    .pm_dram_map_size = 0,
+    .pm_dram_map_size_alt = 0,
+    .pm_jiffies = 0,
 
-    .pm_table_virt_addr          = NULL,
-    .pm_table_virt_addr_alt      = NULL,
+    .pm_table_virt_addr = NULL,
+    .pm_table_virt_addr_alt = NULL,
 };
 
 // Both mutexes are defined separately because the SMN address space can be used
@@ -106,9 +106,9 @@ void smu_args_init(smu_req_args_t* args, const u32 value) {
 }
 
 smu_return_val smu_send_command(const struct pci_dev* dev, const u32 op, smu_req_args_t* args, const smu_mailbox mailbox) {
-    u32 retries, tmp, i, rsp_addr, args_addr, cmd_addr;
+    u32 retries, tmp, rsp_addr, args_addr, cmd_addr;
 
-    // == Pick the correct mailbox address. ==
+    // Pick the correct mailbox address.
     switch (mailbox) {
         case MAILBOX_TYPE_RSMU: {
             rsp_addr = g_smu.addr_rsmu_mb_rsp;
@@ -132,7 +132,7 @@ smu_return_val smu_send_command(const struct pci_dev* dev, const u32 op, smu_req
             return SMU_Return_Unsupported;
     }
 
-    // == In the unlikely event a mailbox is undefined, don't even attempt to execute. ==
+    // In the unlikely event a mailbox is undefined, don't even attempt to execute.
     if (!rsp_addr || !cmd_addr || !args_addr)
         return SMU_Return_Unsupported;
 
@@ -151,8 +151,7 @@ smu_return_val smu_send_command(const struct pci_dev* dev, const u32 op, smu_req
         }
     } while (tmp == 0 && retries--);
 
-    // Step 1.b: A command is still being processed meaning
-    //  a new command cannot be issued.
+    // Step 1.b: A command is still being processed meaning a new command cannot be issued.
     if (!retries && !tmp) {
         mutex_unlock(&amd_smu_mutex);
         pr_debug("SMU Service Request Failed: Timeout on initial wait for mailbox availability.");
@@ -163,7 +162,7 @@ smu_return_val smu_send_command(const struct pci_dev* dev, const u32 op, smu_req
     smu_write_address(dev, rsp_addr, 0);
 
     // Step 3: Write the argument(s) into the argument register(s).
-    for (i = 0; i < SMU_REQ_MAX_ARGS; ++i)
+    for (u32 i = 0; i < SMU_REQ_MAX_ARGS; ++i)
         smu_write_address(dev, args_addr + (i * 4), args->args[i]);
 
     // Step 4: Write the message Id into the Message ID register.
@@ -178,8 +177,7 @@ smu_return_val smu_send_command(const struct pci_dev* dev, const u32 op, smu_req
         }
     } while(tmp == 0 && retries--);
 
-    // Step 6: If the Response register contains OK, then SMU has finished processing
-    //  the message.
+    // Step 6: If the Response register contains OK, then SMU has finished processing the message.
     if (tmp != SMU_Return_OK && !retries) {
         mutex_unlock(&amd_smu_mutex);
 
@@ -194,9 +192,8 @@ smu_return_val smu_send_command(const struct pci_dev* dev, const u32 op, smu_req
         return tmp;
     }
 
-    // Step 7: If a return argument is expected, the Argument register may be read
-    //  at this time.
-    for (i = 0; i < SMU_REQ_MAX_ARGS; ++i) {
+    // Step 7: If a return argument is expected, the Argument register may be read at this time.
+    for (u32 i = 0; i < SMU_REQ_MAX_ARGS; ++i) {
         if (smu_read_address(dev, args_addr + (i * 4), &args->args[i]) != SMU_Return_OK)
             pr_warn("Failed to fetch SMU ARG [%d]!\n", i);
     }
@@ -1010,18 +1007,18 @@ smu_return_val smu_read_pm_table(const struct pci_dev* dev, unsigned char* dst, 
         version = 0xDEADC0DE;
 
         // These models require finding the PM table version to determine its size.
-        if (g_smu.codename == CODENAME_VERMEER  ||
-            g_smu.codename == CODENAME_MATISSE  ||
-            g_smu.codename == CODENAME_RAPHAEL  ||
-            g_smu.codename == CODENAME_GRANITERIDGE  ||
-            g_smu.codename == CODENAME_RENOIR   ||
+        if (g_smu.codename == CODENAME_VERMEER ||
+            g_smu.codename == CODENAME_MATISSE ||
+            g_smu.codename == CODENAME_RAPHAEL ||
+            g_smu.codename == CODENAME_GRANITERIDGE ||
+            g_smu.codename == CODENAME_RENOIR ||
             g_smu.codename == CODENAME_LUCIENNE ||
-            g_smu.codename == CODENAME_REMBRANDT  ||
-            g_smu.codename == CODENAME_PHOENIX  ||
-            g_smu.codename == CODENAME_STRIXPOINT  ||
-            g_smu.codename == CODENAME_CEZANNE  ||
-            g_smu.codename == CODENAME_CHAGALL  ||
-            g_smu.codename == CODENAME_MILAN    ||
+            g_smu.codename == CODENAME_REMBRANDT ||
+            g_smu.codename == CODENAME_PHOENIX ||
+            g_smu.codename == CODENAME_STRIXPOINT ||
+            g_smu.codename == CODENAME_CEZANNE ||
+            g_smu.codename == CODENAME_CHAGALL ||
+            g_smu.codename == CODENAME_MILAN ||
             g_smu.codename == CODENAME_HAWKPOINT ||
             g_smu.codename == CODENAME_STORMPEAK) {
             ret = smu_get_pm_table_version(dev, &version);
