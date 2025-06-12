@@ -160,7 +160,7 @@ SMU v46.54.0
 2
 
 # cat /sys/kernel/ryzen_smu_drv/codename
-StrixPoint
+4
 
 ```
 
@@ -215,7 +215,7 @@ Note: This file returns a string representation of the "Value" field above.
 
 #### `/sys/kernel/ryzen_smu_drv/codename`
 
-Returns the processor codename, or Unknown if the processor is not supported by ryzen_smu.
+Returns a numeric value containing the running processor's codename based on the [smu_processor_codename](lib/smu_common.h) enumeration. 
 
 #### `/sys/kernel/ryzen_smu_drv/rsmu_cmd` or `/sys/kernel/ryzen_smu_drv/mp1_smu_cmd` or `/sys/kernel/ryzen_smu_drv/hsmp_smu_cmd`
 
