@@ -80,7 +80,12 @@ def getCodeName():
         "Chagall",
         "Raphael",
         "Phoenix",
-        "Hawk Point"
+        "Strix Point",
+        "Granite Ridge",
+        "Hawk Point",
+        "Storm Peak",
+        "Krackan Point",
+        "Strix Halo"
     ]
     args = read_file_str(CN_PATH, 2)
 
@@ -178,7 +183,7 @@ def main():
 
     print("Dumping {:d} instances of the PM table during full load ...".format(SAMPLES))
     subprocess.Popen('sh -c "{0} -11 -c -f > /dev/null 2>&1 < /dev/zero"'.format(testerPath), shell=True)
-    
+
     i = 0
     while i < SAMPLES:
         dump("load", codename, version, i)
@@ -189,4 +194,3 @@ def main():
     print("Done!")
 
 main()
-
