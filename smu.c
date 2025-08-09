@@ -960,6 +960,7 @@ u32 smu_update_pmtable_size(const u32 version) {
             break;
         case CODENAME_STRIXPOINT: {
             switch (version) {
+                case 0x5D0009: // assuming that Ryzen PRO is the same as the non PRO variant
                 case 0x5D0008: g_smu.pm_dram_map_size = 0xD54; break;
                 default: return SMU_Return_Unsupported;
             }
